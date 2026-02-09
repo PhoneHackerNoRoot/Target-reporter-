@@ -66,6 +66,10 @@ Select folder
 ```bash
 cd BLACKTRACE
 ```
+Install venv
+```bash
+sudo apt install python3.13-venv
+```
 Run the python virtual environment step-1
 ```bash
 python3 -m venv venv
