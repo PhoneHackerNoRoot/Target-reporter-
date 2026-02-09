@@ -45,7 +45,7 @@ It generates professional PDF reports for easy review.
 
 🔹 Scan Levels
 
-1️⃣ Passive Scan
+1.Passive Scan
 
 DNS resolution
 
@@ -61,7 +61,7 @@ Minimal impact on target.
 
 ---
 
-2️⃣ Extended Scan
+2. Extended Scan
 
 Passive + additional directory checks:
 
@@ -81,7 +81,7 @@ Passive + additional directory checks:
 
 ---
 
-3️⃣ Full Active Scan
+3. Full Active Scan
 
 Extended + Nmap port scanning:
 
