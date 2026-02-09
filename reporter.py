@@ -180,22 +180,42 @@ def generate_pdf(target, data):
 
             # Special case: Nmap
             if section == "Nmap" and "output" in content:
-                # color-coding open ports
-                lines = []
-                for line in content["output"].splitlines():
-                    if "open" in line.lower():
-                        port = int(line.split("/")[0])
-                        if port in [80,443,3389,445]:
-                            lines.append(f'<font color="red">{line}</font>')
-                        elif port in [21,22,23]:
-                            lines.append(f'<font color="orange">{line}</font>')
-                        else:
-                            lines.append(f'<font color="green">{line}</font>')
-                    else:
-                        lines.append(line)
-                elements.append(Preformatted("\n".join(lines), mono_style))
-                elements.append(Spacer(1, 15))
-                continue
+
+    for line in content["output"].splitlines():
+
+        line = line.strip()
+
+        if "open" in line.lower():
+            try:
+                port = int(line.split("/")[0])
+            except:
+                port = 0
+
+            # High Risk
+            if port in [80, 443, 3389, 445]:
+                elements.append(
+                    Paragraph(f'<font color="red">{line}</font>', mono_style)
+                )
+
+            # Medium Risk
+            elif port in [21, 22, 23]:
+                elements.append(
+                    Paragraph(f'<font color="orange">{line}</font>', mono_style)
+                )
+
+            # Low Risk
+            else:
+                elements.append(
+                    Paragraph(f'<font color="green">{line}</font>', mono_style)
+                )
+
+        else:
+            elements.append(Paragraph(line, mono_style))
+
+        elements.append(Spacer(1, 3))
+
+    elements.append(Spacer(1, 15))
+    continue
 
             table_data = [
                 [Paragraph("<b>Key</b>", normal), Paragraph("<b>Value</b>", normal)]
