@@ -21,7 +21,7 @@ from reportlab.lib.pagesizes import A4
 
 console = Console()
 TIMEOUT = 10
-USER_AGENT = "BLACKTRACE/2.0"
+USER_AGENT = "BLACKTRACE/1.0"
 
 # ================= BANNER =================
 
@@ -143,7 +143,6 @@ def generate_pdf(target, data):
         for line in nmap_output.splitlines():
             if "open" in line.lower():
                 port = int(line.split("/")[0])
-                # example scoring: 80,443 high, 22,21 medium, others low
                 if port in [80,443,3389,445]:
                     high_risk += 1
                 elif port in [21,22,23]:
@@ -181,42 +180,43 @@ def generate_pdf(target, data):
             # Special case: Nmap
             if section == "Nmap" and "output" in content:
 
-    for line in content["output"].splitlines():
+                for line in content["output"].splitlines():
 
-        line = line.strip()
+                    line = line.strip()
 
-        if "open" in line.lower():
-            try:
-                port = int(line.split("/")[0])
-            except:
-                port = 0
+                    if "open" in line.lower():
+                        try:
+                            port = int(line.split("/")[0])
+                        except:
+                            port = 0
 
-            # High Risk
-            if port in [80, 443, 3389, 445]:
-                elements.append(
-                    Paragraph(f'<font color="red">{line}</font>', mono_style)
-                )
+                        # High Risk
+                        if port in [80, 443, 3389, 445]:
+                            elements.append(
+                                Paragraph(f'<font color="red">{line}</font>', mono_style)
+                            )
 
-            # Medium Risk
-            elif port in [21, 22, 23]:
-                elements.append(
-                    Paragraph(f'<font color="orange">{line}</font>', mono_style)
-                )
+                        # Medium Risk
+                        elif port in [21, 22, 23]:
+                            elements.append(
+                                Paragraph(f'<font color="orange">{line}</font>', mono_style)
+                            )
 
-            # Low Risk
-            else:
-                elements.append(
-                    Paragraph(f'<font color="green">{line}</font>', mono_style)
-                )
+                        # Low Risk
+                        else:
+                            elements.append(
+                                Paragraph(f'<font color="green">{line}</font>', mono_style)
+                            )
 
-        else:
-            elements.append(Paragraph(line, mono_style))
+                    else:
+                        elements.append(Paragraph(line, mono_style))
 
-        elements.append(Spacer(1, 3))
+                    elements.append(Spacer(1, 3))
 
-    elements.append(Spacer(1, 15))
-    continue
+                elements.append(Spacer(1, 15))
+                continue
 
+            # Other dictionary content
             table_data = [
                 [Paragraph("<b>Key</b>", normal), Paragraph("<b>Value</b>", normal)]
             ]
@@ -243,7 +243,6 @@ def generate_pdf(target, data):
 
     doc.build(elements)
     return filename
-
 
 # ================= MAIN FLOW =================
 
