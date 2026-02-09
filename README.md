@@ -17,13 +17,15 @@ python3 -m venv venv
 ```bash
 source venv/bin/activate
 ```
+Run the python virtual environment
 ```bash
 pip install -r requirements.txt
 ```
+Download modules
 ```bash
 python3 reporter.py
-
-
+```
+Running
 ```
 📘 User Guide (Usage Guide)
 
