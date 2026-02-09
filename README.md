@@ -3,9 +3,8 @@
 Security assessment tool for authorized targets.  
 **Eslatma:** Faqat ruxsatli domenda ishlating.
 ---
-Don't start in Termux, 
-It doesn't work, only for linux, windows, macos, Nethunter 
-
+<h3 style="color:red;">⚠ Do NOT run this tool in Termux</h3>
+<p>Supported systems: Linux, Windows, macOS, Kali NetHunter</p>
 
 ## Quick Start
 
