@@ -115,54 +115,115 @@ def run_nmap(host):
 
 # ================= PDF REPORT =================
 
+from reportlab.platypus import Preformatted
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import inch
+
 def generate_pdf(target, data):
     os.makedirs("reports", exist_ok=True)
-    target_clean = target.replace("_", ".")
-    filename = f"reports/BLACKTRACE_{target_clean}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    filename = f"reports/BLACKTRACE_{target}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
     doc = SimpleDocTemplate(filename, pagesize=A4)
     elements = []
     styles = getSampleStyleSheet()
 
+    normal = styles["Normal"]
+    wrap_style = ParagraphStyle('wrap', parent=styles['Normal'], fontSize=9, leading=12)
+    mono_style = ParagraphStyle('mono', parent=styles['Normal'], fontName="Courier", fontSize=8, leading=10)
+    risk_style = ParagraphStyle('risk', parent=styles['Normal'], fontSize=10, leading=12)
+
+    # ---------- Executive Summary with Risk ----------
+    high_risk = 0
+    medium_risk = 0
+    low_risk = 0
+
+    # Count open ports in Nmap scan for risk scoring
+    nmap_output = data.get("Nmap", {}).get("output", "")
+    if nmap_output:
+        for line in nmap_output.splitlines():
+            if "open" in line.lower():
+                port = int(line.split("/")[0])
+                # example scoring: 80,443 high, 22,21 medium, others low
+                if port in [80,443,3389,445]:
+                    high_risk += 1
+                elif port in [21,22,23]:
+                    medium_risk += 1
+                else:
+                    low_risk += 1
+
     elements.append(Paragraph("BLACKTRACE Security Assessment Report", styles["Heading1"]))
     elements.append(Spacer(1, 12))
-    elements.append(Paragraph(f"Target: {target_clean}", styles["Normal"]))
-    elements.append(Paragraph(f"Date: {datetime.datetime.now()}", styles["Normal"]))
+    elements.append(Paragraph(f"Target: {target}", normal))
+    elements.append(Paragraph(f"Date: {datetime.datetime.now()}", normal))
     elements.append(Spacer(1, 20))
 
+    # Executive Summary
     elements.append(Paragraph("Executive Summary", styles["Heading2"]))
     elements.append(Spacer(1, 10))
-    elements.append(Paragraph(
+    exec_summary = (
         "This report contains passive and active reconnaissance findings. "
-        "Exposed services and configurations should be reviewed immediately.",
-        styles["Normal"]
-    ))
+        "Exposed services and configurations should be reviewed immediately."
+    )
+    elements.append(Paragraph(exec_summary, normal))
+    elements.append(Spacer(1, 10))
+
+    risk_summary = f"Risk Summary: [High: {high_risk}, Medium: {medium_risk}, Low: {low_risk}]"
+    elements.append(Paragraph(risk_summary, risk_style))
     elements.append(Spacer(1, 20))
 
-    # --- Create PDF table for each section ---
+    # ---------- Detailed Sections ----------
     for section, content in data.items():
         elements.append(Paragraph(section, styles["Heading3"]))
-        elements.append(Spacer(1, 6))
+        elements.append(Spacer(1, 8))
 
         if isinstance(content, dict):
-            # If headers or dict, show as table
-            table_data = [["Key", "Value"]]
-            for k,v in content.items():
-                table_data.append([str(k), str(v)[:500]])
-            table = PDFTable(table_data, colWidths=[150, 350])
+
+            # Special case: Nmap
+            if section == "Nmap" and "output" in content:
+                # color-coding open ports
+                lines = []
+                for line in content["output"].splitlines():
+                    if "open" in line.lower():
+                        port = int(line.split("/")[0])
+                        if port in [80,443,3389,445]:
+                            lines.append(f'<font color="red">{line}</font>')
+                        elif port in [21,22,23]:
+                            lines.append(f'<font color="orange">{line}</font>')
+                        else:
+                            lines.append(f'<font color="green">{line}</font>')
+                    else:
+                        lines.append(line)
+                elements.append(Preformatted("\n".join(lines), mono_style))
+                elements.append(Spacer(1, 15))
+                continue
+
+            table_data = [
+                [Paragraph("<b>Key</b>", normal), Paragraph("<b>Value</b>", normal)]
+            ]
+
+            for k, v in content.items():
+                table_data.append([
+                    Paragraph(str(k), wrap_style),
+                    Paragraph(str(v), wrap_style)
+                ])
+
+            table = PDFTable(table_data, colWidths=[2*inch, 4*inch])
             table.setStyle(TableStyle([
-                ('BACKGROUND',(0,0),(-1,0),colors.grey),
-                ('GRID',(0,0),(-1,-1),1,colors.black),
-                ('TEXTCOLOR',(0,0),(-1,0),colors.white)
+                ('BACKGROUND',(0,0),(-1,0),colors.black),
+                ('TEXTCOLOR',(0,0),(-1,0),colors.white),
+                ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+                ('VALIGN',(0,0),(-1,-1),'TOP')
             ]))
+
             elements.append(table)
-            elements.append(Spacer(1, 12))
+            elements.append(Spacer(1, 15))
         else:
-            elements.append(Paragraph(str(content), styles["Normal"]))
-            elements.append(Spacer(1, 12))
+            elements.append(Paragraph(str(content), wrap_style))
+            elements.append(Spacer(1, 15))
 
     doc.build(elements)
     return filename
+
 
 # ================= MAIN FLOW =================
 
