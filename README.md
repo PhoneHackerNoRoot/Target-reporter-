@@ -4,23 +4,59 @@ Security assessment tool for authorized targets.
 **Eslatma:** Faqat ruxsatli domenda ishlating.
 ---
 
-# ⚠️ IMPORTANT SYSTEM NOTICE
+<div align="center">
 
-## ❌ TERMUX IS NOT SUPPORTED
+# 🚨 SYSTEM REQUIREMENTS NOTICE
 
-### This tool does **NOT** work in Termux.
-
----
-
-# ✅ SUPPORTED OPERATING SYSTEMS
-
-- **Linux**
-- **Windows**
-- **macOS**
-- **Kali NetHunter**
+</div>
 
 ---
 
+## ⛔ Termux Is NOT Supported
+
+> BLACKTRACE is a low-level reconnaissance engine.  
+> It requires full operating system access and native network control.
+
+Termux does **not** provide:
+
+- Raw socket capabilities  
+- Full kernel-level networking access  
+- Native binary execution compatibility  
+- Proper Nmap integration  
+
+Running BLACKTRACE inside Termux will result in:
+
+- Scan failures  
+- Incomplete results  
+- Module execution errors  
+- Unexpected behavior  
+
+### ❌ Do NOT use Termux
+
+---
+
+## ✅ Officially Supported Platforms
+
+| Platform | Supported |
+|----------|-----------|
+| 🐧 Linux (Kali, Ubuntu, Arch, Debian) | ✅ Yes |
+| 🪟 Windows | ✅ Yes |
+| 🍎 macOS | ✅ Yes |
+| 📱 Kali NetHunter | ✅ Yes |
+| 📦 Termux | ❌ No |
+
+---
+
+## ⚙ Recommended Setup
+
+For maximum stability and full feature support:
+
+- Kali Linux (native installation recommended)  
+- Python 3.10+  
+- Nmap installed system-wide  
+- Virtual environment (venv) enabled  
+
+---
 ## Quick Start
 
 ```bash
