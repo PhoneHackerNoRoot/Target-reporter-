@@ -9,6 +9,9 @@ Security assessment tool for authorized targets.
 
 ```bash
 git clone https://github.com/Cyber-Securyt-tools-builder/BLACKTRACE.git
+```
+Select folder
+```bash
 cd BLACKTRACE
 ```
 Run the python virtual environment step-1
