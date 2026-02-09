@@ -1,6 +1,12 @@
 git clone https://github.com/Cyber-Securyt-tools-builder/Target-Reporter.git
+
+
 cd Trget-Reporter
+
+
 pip install -r requirements.txt
+
+
 python3 reporter.py 
 
 
