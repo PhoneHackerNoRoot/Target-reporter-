@@ -4,7 +4,7 @@ git clone https://github.com/Cyber-Securyt-tools-builder/Target-Reporter.git
 cd Trget-Reporter
 
 
-pip install -r requirements.txt or 
+pip install -r requirements.txt                or 
 
 python3 -m pip install -r requirements.txt
 
