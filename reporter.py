@@ -34,7 +34,7 @@ def banner():
 ██╔══██╗██║     ██╔══██║██║     ██╔═██╗    ██║   ██╔══██╗██╔══██║██║     ██╔══╝
 ██████╔╝███████╗██║  ██║╚██████╗██║  ██╗   ██║   ██║  ██║██║  ██║╚██████╗███████╗
 ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝
-        Passive & Active Recon Engine
+        Passive & Active Recon Engine V 1.0
 """, style="bold red", box=box.DOUBLE))
 
 # ================= MENU =================
@@ -54,9 +54,7 @@ def menu():
 # ================= CORE FUNCTIONS =================
 
 def normalize(target):
-    if not target.startswith("http"):
-        return "https://" + target
-    return target
+    return "https://" + target if not target.startswith("http") else target
 
 def resolve_dns(host):
     try:
@@ -117,7 +115,8 @@ def run_nmap(host):
 
 def generate_pdf(target, data):
     os.makedirs("reports", exist_ok=True)
-    filename = f"reports/BLACKTRACE_{target}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    target_clean = target.replace("_", ".")
+    filename = f"reports/BLACKTRACE_{target_clean}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
     doc = SimpleDocTemplate(filename, pagesize=A4)
     elements = []
@@ -125,7 +124,7 @@ def generate_pdf(target, data):
 
     elements.append(Paragraph("BLACKTRACE Security Assessment Report", styles["Heading1"]))
     elements.append(Spacer(1, 12))
-    elements.append(Paragraph(f"Target: {target}", styles["Normal"]))
+    elements.append(Paragraph(f"Target: {target_clean}", styles["Normal"]))
     elements.append(Paragraph(f"Date: {datetime.datetime.now()}", styles["Normal"]))
     elements.append(Spacer(1, 20))
 
@@ -138,21 +137,29 @@ def generate_pdf(target, data):
     ))
     elements.append(Spacer(1, 20))
 
-    table_data = [["Section", "Details"]]
+    # --- Create PDF table for each section ---
+    for section, content in data.items():
+        elements.append(Paragraph(section, styles["Heading3"]))
+        elements.append(Spacer(1, 6))
 
-    for k,v in data.items():
-        table_data.append([k, str(v)[:1200]])
+        if isinstance(content, dict):
+            # If headers or dict, show as table
+            table_data = [["Key", "Value"]]
+            for k,v in content.items():
+                table_data.append([str(k), str(v)[:500]])
+            table = PDFTable(table_data, colWidths=[150, 350])
+            table.setStyle(TableStyle([
+                ('BACKGROUND',(0,0),(-1,0),colors.grey),
+                ('GRID',(0,0),(-1,-1),1,colors.black),
+                ('TEXTCOLOR',(0,0),(-1,0),colors.white)
+            ]))
+            elements.append(table)
+            elements.append(Spacer(1, 12))
+        else:
+            elements.append(Paragraph(str(content), styles["Normal"]))
+            elements.append(Spacer(1, 12))
 
-    table = PDFTable(table_data)
-    table.setStyle(TableStyle([
-        ('BACKGROUND',(0,0),(-1,0),colors.black),
-        ('TEXTCOLOR',(0,0),(-1,0),colors.white),
-        ('GRID',(0,0),(-1,-1),1,colors.grey)
-    ]))
-
-    elements.append(table)
     doc.build(elements)
-
     return filename
 
 # ================= MAIN FLOW =================
@@ -202,7 +209,7 @@ def main():
         console.print("\n[cyan]Starting scan...[/cyan]")
 
         data = run_scan(choice, target)
-        pdf = generate_pdf(target.replace(".","_"), data)
+        pdf = generate_pdf(target, data)
 
         console.print(Panel(
             f"[bold green]Report generated successfully[/bold green]\n{pdf}",
