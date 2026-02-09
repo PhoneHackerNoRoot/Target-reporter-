@@ -1,4 +1,4 @@
-![BLACKTRACE Logo](assets/BLACKTRACE.png)
+![BLACKTRACE Logo](BLACKTRACE.png)
 # BLACKTRACE - Passive & Active Recon Engine
 Security assessment tool for authorized targets.  
 **Eslatma:** Faqat ruxsatli domenda ishlating.
