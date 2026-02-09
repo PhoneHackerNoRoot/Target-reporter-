@@ -2,7 +2,8 @@
 # BLACKTRACE - Passive & Active Recon Engine
 Security assessment tool for authorized targets.  
 **Eslatma:** Faqat ruxsatli domenda ishlating.
-
+Don't start in Termux, 
+It doesn't work, only for linux, windows, macos, Nethunter 
 
 
 ## Quick Start
