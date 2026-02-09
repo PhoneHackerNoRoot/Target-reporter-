@@ -34,7 +34,7 @@ def banner():
 ██╔══██╗██║     ██╔══██║██║     ██╔═██╗    ██║   ██╔══██╗██╔══██║██║     ██╔══╝
 ██████╔╝███████╗██║  ██║╚██████╗██║  ██╗   ██║   ██║  ██║██║  ██║╚██████╗███████╗
 ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝
-        Passive & Active Recon Engine V 1.0 
+        Passive & Active Recon Engine V 1.0
             Created by khamidjanow
             Instagram @kham1djanow
 """, style="bold red", box=box.DOUBLE))
@@ -48,7 +48,7 @@ def menu():
 
     table.add_row("1", "Passive Scan")
     table.add_row("2", "Extended Scan")
-    table.add_row("3", "Full Active Scan (nmap)")
+    table.add_row("3", "Full Active Scan (nmap + nikto)")
     table.add_row("4", "Exit")
 
     console.print(table)
@@ -113,6 +113,20 @@ def run_nmap(host):
     except Exception as e:
         return {"error": str(e)}
 
+def run_nikto(host):
+    if shutil.which("nikto") is None:
+        return {"error": "nikto not installed"}
+
+    try:
+        output = subprocess.check_output(
+            ["nikto", "-h", host],
+            timeout=300,
+            universal_newlines=True
+        )
+        return {"output": output[:4000]}
+    except Exception as e:
+        return {"error": str(e)}
+
 # ================= PDF REPORT =================
 
 from reportlab.platypus import Preformatted
@@ -130,25 +144,6 @@ def generate_pdf(target, data):
     normal = styles["Normal"]
     wrap_style = ParagraphStyle('wrap', parent=styles['Normal'], fontSize=9, leading=12)
     mono_style = ParagraphStyle('mono', parent=styles['Normal'], fontName="Courier", fontSize=8, leading=10)
-    risk_style = ParagraphStyle('risk', parent=styles['Normal'], fontSize=10, leading=12)
-
-    # ---------- Executive Summary with Risk ----------
-    high_risk = 0
-    medium_risk = 0
-    low_risk = 0
-
-    # Count open ports in Nmap scan for risk scoring
-    nmap_output = data.get("Nmap", {}).get("output", "")
-    if nmap_output:
-        for line in nmap_output.splitlines():
-            if "open" in line.lower():
-                port = int(line.split("/")[0])
-                if port in [80,443,3389,445]:
-                    high_risk += 1
-                elif port in [21,22,23]:
-                    medium_risk += 1
-                else:
-                    low_risk += 1
 
     elements.append(Paragraph("BLACKTRACE Security Assessment Report", styles["Heading1"]))
     elements.append(Spacer(1, 12))
@@ -156,67 +151,19 @@ def generate_pdf(target, data):
     elements.append(Paragraph(f"Date: {datetime.datetime.now()}", normal))
     elements.append(Spacer(1, 20))
 
-    # Executive Summary
-    elements.append(Paragraph("Executive Summary", styles["Heading2"]))
-    elements.append(Spacer(1, 10))
-    exec_summary = (
-        "This report contains passive and active reconnaissance findings. "
-        "Exposed services and configurations should be reviewed immediately."
-    )
-    elements.append(Paragraph(exec_summary, normal))
-    elements.append(Spacer(1, 10))
-
-    risk_summary = f"Risk Summary: [High: {high_risk}, Medium: {medium_risk}, Low: {low_risk}]"
-    elements.append(Paragraph(risk_summary, risk_style))
-    elements.append(Spacer(1, 20))
-
-    # ---------- Detailed Sections ----------
     for section, content in data.items():
         elements.append(Paragraph(section, styles["Heading3"]))
         elements.append(Spacer(1, 8))
 
         if isinstance(content, dict):
 
-            # Special case: Nmap
-            if section == "Nmap" and "output" in content:
-
+            if "output" in content:
                 for line in content["output"].splitlines():
-
-                    line = line.strip()
-
-                    if "open" in line.lower():
-                        try:
-                            port = int(line.split("/")[0])
-                        except:
-                            port = 0
-
-                        # High Risk
-                        if port in [80, 443, 3389, 445]:
-                            elements.append(
-                                Paragraph(f'<font color="red">{line}</font>', mono_style)
-                            )
-
-                        # Medium Risk
-                        elif port in [21, 22, 23]:
-                            elements.append(
-                                Paragraph(f'<font color="orange">{line}</font>', mono_style)
-                            )
-
-                        # Low Risk
-                        else:
-                            elements.append(
-                                Paragraph(f'<font color="green">{line}</font>', mono_style)
-                            )
-
-                    else:
-                        elements.append(Paragraph(line, mono_style))
-
+                    elements.append(Paragraph(line.strip(), mono_style))
                     elements.append(Spacer(1, 3))
-
                 elements.append(Spacer(1, 15))
                 continue
 
-            # Other dictionary content
             table_data = [
                 [Paragraph("<b>Key</b>", normal), Paragraph("<b>Value</b>", normal)]
             ]
@@ -267,6 +214,9 @@ def run_scan(level, target):
     if level == "3":
         console.print("[red][*] Running full nmap scan...[/red]")
         data["Nmap"] = run_nmap(host)
+
+        console.print("[red][*] Running Nikto scan...[/red]")
+        data["Nikto"] = run_nikto(host)
 
     return data
 
