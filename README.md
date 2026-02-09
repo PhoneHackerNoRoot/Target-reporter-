@@ -11,21 +11,22 @@ Security assessment tool for authorized targets.
 git clone https://github.com/Cyber-Securyt-tools-builder/BLACKTRACE.git
 cd BLACKTRACE
 ```
+Run the python virtual environment step-1
 ```bash
 python3 -m venv venv
 ```
+Run the python virtual environment step-2
 ```bash
 source venv/bin/activate
 ```
-Run the python virtual environment
+Download modules
 ```bash
 pip install -r requirements.txt
 ```
-Download modules
+Run the tool
 ```bash
 python3 reporter.py
-```
-Running
+
 ```
 📘 User Guide (Usage Guide)
 
