@@ -56,7 +56,7 @@ For maximum stability and full feature support:
 - Nmap installed system-wide  
 - Virtual environment (venv) enabled  
 ---
-✔️PLEASE RUN TOOL STEP BY STEP ‼️
+✔️PLEASE THE TOOL STEP BY STEP RUN ‼️
 ---
 ## Quick Start
 
