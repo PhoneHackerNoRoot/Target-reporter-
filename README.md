@@ -55,7 +55,8 @@ For maximum stability and full feature support:
 - Python 3.10+  
 - Nmap installed system-wide  
 - Virtual environment (venv) enabled  
-
+---
+✔️PLEASE RUN TOOL STEP BY STEP ‼️
 ---
 ## Quick Start
 
